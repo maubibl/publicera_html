@@ -1,6 +1,12 @@
 # publicera_HTML
 This project is designed to process XML data using XSLT transformations. It utilizes Saxon, a powerful XSLT and XQuery processor, to transform the XML file into a final HTML output.
 
+## Update 2025-12-15
+Updated jats-html.xsl, so that it handles:
+- responsive images
+- keywords on single line
+- publisher-id filtering
+
 ## Project Structure
 
 - `process.sh`: A shell script that orchestrates the transformation process.
