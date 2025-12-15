@@ -18,7 +18,7 @@
 <!--                                                               -->
 <!--  COMPONENTS REQUIRED:                                         -->
 <!--             1) This stylesheet                                -->
-<!--             2) CSS styles defined in educare.css              -->
+<!--             2) CSS styles defined in educare.css         -->
 <!--                (to be placed with the results)                -->
 <!--                                                               -->
 <!--  INPUT:     An XML document valid to (any of) the             -->
@@ -163,7 +163,7 @@ or pipeline) parameterized.
   
   <xsl:param name="transform" select="'jats-html.xsl'"/>
 
-  <xsl:param name="css" select="'educare.css'"/>
+ <!-- <xsl:param name="css" select="'https://publicera.kb.se/educare/libraryFiles/downloadPublic/263'"/>-->
   
   <xsl:param name="report-warnings" select="'no'"/>
   
@@ -204,7 +204,14 @@ or pipeline) parameterized.
         <xsl:value-of
           select="/article/front/article-meta/title-group/article-title[1]"/>
       </title>
-      <link rel="stylesheet" type="text/css" href="{$css}"/>
+      <!--set css depending on journal-->
+      <xsl:variable name="css-url">
+        <xsl:choose>
+          <xsl:when test="/article/front/journal-meta/journal-title-group/journal-title = 'Educare'">https://publicera.kb.se/educare/libraryFiles/downloadPublic/263</xsl:when>
+          <xsl:otherwise>https://publicera.kb.se/pfs/libraryFiles/downloadPublic/265</xsl:otherwise>
+        </xsl:choose>
+      </xsl:variable>
+<link rel="stylesheet" type="text/css" href="{$css-url}"/>
       <!-- XXX check: any other header stuff? XXX -->
     </head>
   </xsl:template>
@@ -530,6 +537,8 @@ or pipeline) parameterized.
 
               <xsl:apply-templates mode="metadata"
                 select="custom-meta-group | custom-meta-wrap"/>
+            
+            <xsl:apply-templates mode="metadata" select="article-id"/>
             </div>
       </div>
       </xsl:if>
@@ -662,11 +671,18 @@ or pipeline) parameterized.
        abbrev-journal-title*) -->
 
   <xsl:template match="journal-title" mode="metadata">
+    <h3 class="journal-title">
+      <xsl:apply-templates/>
+    </h3>
+  </xsl:template>
+
+  <!--
+  <xsl:template match="journal-title" mode="metadata">
     <xsl:call-template name="metadata-labeled-entry">
       <xsl:with-param name="label">Title</xsl:with-param>
     </xsl:call-template>
   </xsl:template>
-
+-->
 
   <xsl:template match="journal-subtitle" mode="metadata">
     <xsl:call-template name="metadata-labeled-entry">
@@ -1571,26 +1587,24 @@ or pipeline) parameterized.
 
 
   <xsl:template match="xref" mode="metadata-inline">
- <!--These are not expected to appear in mixed content, so
+  <!-- These are not expected to appear in mixed content, so
       brackets are provided -->
     <span class="generated">[</span>
     <xsl:apply-templates select="."/>
     <span class="generated">]</span>
   </xsl:template>
-<!--
-  <xsl:template match="contrib-id" mode="metadata-inline">
-    <span class="generated">[</span>
+ 
+ <!-- <xsl:template match="contrib-id" mode="metadata-inline">
+     <span class="generated">[</span>
     <xsl:apply-templates select="."/>
     <span class="generated">] </span>
-  </xsl:template>
-  -->
+  </xsl:template>-->
 
   <xsl:template match="contrib-id" mode="metadata-inline">
     <span class="generated">
     <xsl:apply-templates select="."/>
     </span>
   </xsl:template>
-
   
   <xsl:template name="contrib-info">
     <!-- Placed in a right-hand pane -->
@@ -1754,7 +1768,7 @@ or pipeline) parameterized.
     </xsl:call-template>
   </xsl:template>
 
-
+<!--
   <xsl:template match="kwd-group" mode="metadata">
     <xsl:call-template name="metadata-area">
       <xsl:with-param name="label">
@@ -1766,16 +1780,36 @@ or pipeline) parameterized.
       </xsl:with-param>
     </xsl:call-template>
   </xsl:template>
-
-
+-->
+  <xsl:template match="kwd-group" mode="metadata">
+    <xsl:call-template name="metadata-area">
+      <xsl:with-param name="label">
+        <xsl:apply-templates select="title|label" mode="metadata-inline"/>
+        <xsl:if test="not(title|label)">Keywords</xsl:if>
+      </xsl:with-param>
+      <xsl:with-param name="contents">
+        <span class="keywords">
+          <xsl:for-each select="kwd">
+            <xsl:apply-templates select="."/>
+            <xsl:if test="position() != last()">
+              <xsl:text>; </xsl:text>
+            </xsl:if>
+          </xsl:for-each>
+        </span>
+      </xsl:with-param>
+    </xsl:call-template>
+  </xsl:template>
+  
   <xsl:template match="title" mode="metadata">
     <xsl:apply-templates select="."/>
   </xsl:template>
 
 
+
+
   <xsl:template match="kwd" mode="metadata">
     <xsl:call-template name="metadata-labeled-entry">
-      <xsl:with-param name="label">Keyword</xsl:with-param>
+    <!--   <xsl:with-param name="label">Keyword</xsl:with-param>-->
     </xsl:call-template>
   </xsl:template>
 
@@ -2204,7 +2238,7 @@ or pipeline) parameterized.
 
   <xsl:template match="graphic | inline-graphic">
     <xsl:apply-templates/>
-    <img alt="{@xlink:href}">
+    <img alt="{@xlink:href}" class="responsive-img">
       <xsl:for-each select="alt-text">
         <xsl:attribute name="alt">
           <xsl:value-of select="normalize-space(string(.))"/>
